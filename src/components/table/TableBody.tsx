@@ -5,15 +5,16 @@ interface TableBodyProps<TData> {
   table: Table<TData>
 }
 
-export default function TableBody<TData>({
+const TableBody = <TData,>({
   table
-}: TableBodyProps<TData>) {
-
+}: TableBodyProps<TData>) => {
   return (
-    <tbody>
+    <tbody className="divide-y divide-gray-200 bg-white">
       {table.getRowModel().rows.map((row) => (
         <TableRow key={row.id} row={row} />
       ))}
     </tbody>
   )
 }
+
+export default TableBody;

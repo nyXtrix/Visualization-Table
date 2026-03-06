@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { Dataset } from "@/types/pivot"
+import type { Dataset } from "@/types/visual"
 
 export function useDatasetStore() {
 

@@ -14,6 +14,8 @@ interface FeaturesCardProps {
   handleCloseClick: (id: string) => void;
   childrenClassName?: string;
   enableAddIcon?: boolean;
+  onAddClick?: () => void;
+  onSearch?: (value: string) => void;
 }
 
 const FeaturesCard = ({
@@ -25,13 +27,15 @@ const FeaturesCard = ({
   handleCloseClick,
   childrenClassName,
   enableAddIcon = false,
+  onAddClick,
+  onSearch,
 }: FeaturesCardProps) => {
   return (
     <div
       className={cn(
         "h-full hidden flex-col min-h-0 bg-white p-2 border gap-2",
         "transform transition-all duration-300 ease-in-out",
-        isOpen ? "flex max-w-[15%] w-full" : "",
+        isOpen ? "flex w-full max-w-[15%] flex-shrink-0 z-30" : "",
       )}
     >
       <div className="flex justify-between flex-none items-center">
@@ -43,6 +47,7 @@ const FeaturesCard = ({
                 icon={Plus}
                 className="p-2 cursor-pointer"
                 variant="ghost"
+                onClick={onAddClick}
               />
               <span className="h-full p-2 text-gray-400">|</span>
             </div>
@@ -59,7 +64,7 @@ const FeaturesCard = ({
         </div>
       </div>
 
-      {enableSearch && <SearchInput />}
+      {enableSearch && <SearchInput onSearch={onSearch} />}
 
       <div
         className={cn(

@@ -1,4 +1,4 @@
-import type { Dataset, FieldItem } from "@/types/pivot"
+import type { Dataset, FieldItem } from "@/types/visual"
 
 export function createDataset(
   fileName: string,
@@ -13,6 +13,7 @@ export function createDataset(
   return {
     id: crypto.randomUUID(),
     name: fileName,
-    fields
+    fields,
+    tableName: fileName
   }
 }
