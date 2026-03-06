@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import InputWithIcon from "../inputs/InputWithIcon";
 
@@ -36,7 +36,7 @@ const SearchInput = ({
       placeholder={placeholder}
       value={value}
       onChange={(e) => setValue(e.target.value)}
-      className="h-8"
+      className="h-8 text-sm"
     />
   );
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
@@ -11,13 +11,12 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children, activeItems, handlePrimaryActionButtonClick, isSidebarPrimaryActionsEnabled=true }: AppLayoutProps) => {
 
-
   return (
     <div className="h-dvh flex flex-col bg-gray-100">
       <Navbar className="border bg-white h-max" />
 
       <div className="flex flex-1 min-h-0 p-2">
-        <main className="flex flex-1 min-h-0 overflow-hidden">
+        <main className="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-white rounded-lg shadow-sm">
           {children}
         </main>
 
@@ -32,4 +31,4 @@ const AppLayout = ({ children, activeItems, handlePrimaryActionButtonClick, isSi
   );
 };
 
-export default AppLayout;
+export default memo(AppLayout);

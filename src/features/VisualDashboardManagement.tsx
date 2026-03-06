@@ -1,63 +1,119 @@
-import React from "react";
-import DataCard from "./Visual_Dashboard/Features/DataCard";
-import type { Dataset } from "@/types/pivot";
-import VisualisationCard from "./Visual_Dashboard/Features/VisualisationCard";
-import EmptyState from "./Visual_Dashboard/EmptyState";
+import { lazy, Suspense, useCallback, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
-import DataEmptyState from "@/components/shared/DataEmptyState";
-import VisualTablePage from "./Visual_Dashboard/VisualTablePage";
-const datasets: Dataset[] = [
-  {
-    id: "dataset1",
-    name: "dataset_1.csv",
-    fields: [
-      { id: 1, name: "Country" },
-      { id: 2, name: "City" },
-      { id: 3, name: "Revenue" },
-    ],
-  },
-  {
-    id: "dataset2",
-    name: "dataset_2.csv",
-    fields: [
-      { id: 4, name: "Product" },
-      { id: 5, name: "Price" },
-      { id: 6, name: "Category" },
-    ],
-  },
-];
+import { csvLoader } from "@/duckDB/core/csvLoader";
+import { getTableColumns } from "@/duckDB/core/getColumns";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { addDataset } from "@/store/datasetSlice";
+import { setTableState } from "@/store/uiSlice";
+import Loader from "@/components/shared/Loader";
+import { useVisualizationTableQuery } from "@/hooks/useVisualizationTableQuery";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+
+const DataCard = lazy(() => import("./Visual_Dashboard/Features/DataCard"));
+const VisualisationCard = lazy(() => import("./Visual_Dashboard/Features/VisualisationCard"));
+const VisualizationTablePage = lazy(() => import("./Visual_Dashboard/VisualizationTablePage"));
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const VisualDashboardManagement = () => {
-  const [activeItems, setActiveItems] = React.useState<string[]>([]);
+  const { showExitModal, setShowExitModal, handleConfirmExit } = useUnsavedChanges();
+  const [activeItems, setActiveItems] = useState<string[]>([]);
+  const dispatch = useAppDispatch();
+  const datasets = useAppSelector((state) => state.dataset.datasets);
 
-  const enablePrimarySidebarActions = datasets.length > 0;
+  const { data, columns, loading: queryLoading } = useVisualizationTableQuery();
+  const [uploadLoading, setUploadLoading] = useState(false);
 
-  const handlePrimaryActionButtonClick = (id: string) => {
-    setActiveItems((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((item) => item !== id);
+  const handleFileUpload = useCallback(async (file: File | null) => {
+    if (!file) return;
+
+    setUploadLoading(true);
+    try {
+      const isFirstUpload = datasets.length === 0;
+      const tableName = await csvLoader(file);
+      const cols = await getTableColumns(tableName);
+      dispatch(setTableState("CONFIG_EMPTY"));
+
+      dispatch(
+        addDataset({
+          id: crypto.randomUUID(),
+          name: file.name,
+          tableName,
+          fields: cols.map((col: { name: string; type: string }, index: number) => ({
+            id: index,
+            name: col.name,
+            type: col.type,
+          })),
+        })
+      );
+
+      if (isFirstUpload) {
+        setActiveItems(["data", "visualisation"]);
       }
+    } finally {
+      setUploadLoading(false);
+    }
+  }, [dispatch, datasets.length]);
 
-      return [...prev, id];
-    });
-  };
+
+  const handlePrimaryActionButtonClick = useCallback((id: string) => {
+    setActiveItems((prev) => 
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }, []);
 
   const isDataOpen = activeItems.includes("data");
   const isVisualisationOpen = activeItems.includes("visualisation");
+
   return (
-    <AppLayout
-      activeItems={activeItems}
-      handlePrimaryActionButtonClick={handlePrimaryActionButtonClick}
-      isSidebarPrimaryActionsEnabled={enablePrimarySidebarActions}
-    >
-      <div className="bg-white flex h-full w-full border overflow-hidden">
-        <div className="h-full w-full border">
-          <VisualTablePage/>
+    <>
+      <ConfirmationModal
+        isOpen={showExitModal}
+        onClose={() => setShowExitModal(false)}
+        onConfirm={handleConfirmExit}
+        title="Unsaved Changes"
+        description="Are you sure you want to leave? Your uploaded datasets and configurations will be lost."
+        confirmText="Leave Page"
+        cancelText="Stay"
+        variant="danger"
+      />
+      {uploadLoading && <Loader fullPage />}
+      <AppLayout
+        activeItems={activeItems}
+        handlePrimaryActionButtonClick={handlePrimaryActionButtonClick}
+        isSidebarPrimaryActionsEnabled={datasets.length > 0}
+      >
+        <div className="bg-white flex h-full w-full overflow-hidden">
+          <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30">
+            <Suspense fallback={<Loader fullPage/>}>
+              <VisualizationTablePage
+                data={data}
+                columns={columns}
+                initialFileUpload={handleFileUpload}
+                loading={queryLoading}
+              />
+            </Suspense>
+          </div>
+          
+          <Suspense fallback={null}>
+            <VisualisationCard
+              id="visualisation"
+              isOpen={isVisualisationOpen}
+              handleCloseCardClick={handlePrimaryActionButtonClick}
+            />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <DataCard
+              dataset={datasets}
+              id="data"
+              isOpen={isDataOpen}
+              handleCardCloseClick={handlePrimaryActionButtonClick}
+              onFileUpload={handleFileUpload}
+            />
+          </Suspense>
         </div>
-        <VisualisationCard id="visualisation" isOpen={isVisualisationOpen} handleCloseCardClick={handlePrimaryActionButtonClick}/>
-        <DataCard dataset={datasets} id="data" isOpen={isDataOpen} handleCardCloseClick={handlePrimaryActionButtonClick}/>
-      </div>
-    </AppLayout>
+      </AppLayout>
+    </>
   );
 };
 
