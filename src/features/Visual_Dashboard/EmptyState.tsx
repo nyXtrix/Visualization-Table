@@ -1,4 +1,3 @@
-import React from "react";
 import IconButton from "../../components/ui/IconButton";
 import { FolderOpen, Upload } from "lucide-react";
 
