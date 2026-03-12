@@ -9,7 +9,7 @@ export async function getDistinctCombinations(
   if (!columns.length) return [];
 
   const query = `
-    SELECT DISTINCT ${columns.map(c => `${c} AS "${c}"`).join(", ")}
+    SELECT DISTINCT ${columns.map(c => `${c} AS "${c.replace(/"/g, '""')}"`).join(", ")}
     FROM ${table}
     ${joinSQL}
     ORDER BY ${columns.join(", ")}

@@ -8,11 +8,11 @@ import { setTableState } from "@/store/uiSlice";
 import Loader from "@/components/shared/Loader";
 import { useVisualizationTableQuery } from "@/hooks/useVisualizationTableQuery";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const DataCard = lazy(() => import("./Visual_Dashboard/Features/DataCard"));
 const VisualisationCard = lazy(() => import("./Visual_Dashboard/Features/VisualisationCard"));
 const VisualizationTablePage = lazy(() => import("./Visual_Dashboard/VisualizationTablePage"));
-import ConfirmationModal from "@/components/common/ConfirmationModal";
 
 const VisualDashboardManagement = () => {
   const { showExitModal, setShowExitModal, handleConfirmExit } = useUnsavedChanges();
@@ -82,8 +82,8 @@ const VisualDashboardManagement = () => {
         handlePrimaryActionButtonClick={handlePrimaryActionButtonClick}
         isSidebarPrimaryActionsEnabled={datasets.length > 0}
       >
-        <div className="bg-white flex h-full w-full overflow-hidden">
-          <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30">
+        <div className="bg-white dark:bg-black flex h-full w-full overflow-hidden">
+          <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30 dark:border dark:border-white/20 dark:bg-black">
             <Suspense fallback={<Loader fullPage/>}>
               <VisualizationTablePage
                 data={data}

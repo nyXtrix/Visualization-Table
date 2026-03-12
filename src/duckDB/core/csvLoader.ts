@@ -6,11 +6,21 @@ export async function csvLoader(file: File): Promise<string> {
 
   const tableName = file.name
     .replace(".csv", "")
-    .replace(/[^a-zA-Z0-9_]/g, "_");
+    .replace(/[^a-zA-Z0-9_]/g, "_")
+    .replace(/^\uFEFF/, '');
 
   const buffer = await file.arrayBuffer();
-  const decoder = new TextDecoder("windows-1252");
-  const text = decoder.decode(buffer);
+
+  let text:string;
+  try{
+    const decoder = new TextDecoder('utf-8', {fatal:true});
+    text = decoder.decode(buffer);
+  }
+  catch{
+    text = new TextDecoder('windows-1252').decode(buffer)
+  }
+  // const decoder = new TextDecoder("windows-1252");
+  // const text = decoder.decode(buffer);
 
   const utf8File = new File([text], file.name, { type: "text/csv" });
 
@@ -22,7 +32,7 @@ export async function csvLoader(file: File): Promise<string> {
   );
 
   await connection.query(`
-    CREATE TABLE ${tableName} AS
+    CREATE TABLE "${tableName}" AS
     SELECT *
     FROM read_csv_auto('${utf8File.name}', IGNORE_ERRORS=true)
   `);

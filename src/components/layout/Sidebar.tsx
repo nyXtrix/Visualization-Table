@@ -24,14 +24,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <div
-      className={cn("flex flex-col justify-between w-max right-10 h-[calc(100vh-66)] bg-white/50 py-5 px-2",className)}
+      className={cn("flex flex-col justify-between w-max right-10 h-[calc(100vh-66)] bg-white/50 py-5 px-2 dark:bg-gray-900/50 dark:border-white/20",className)}
     >
       <div className="flex flex-col gap-2">
         {SIDEBAR_PRIMARY_ACTIONS.map((action) => (
           <TooltipWrapper key={action.id} title={action.title} position="left">
             <IconButton
               icon={action.icon}
-              className={cn("p-2! cursor-pointer rounded-md", activeItem.includes(action.id) ? "bg-gray-200 text-blue-600" : "", isPrimaryActionsDisabled ? "opacity-50 cursor-not-allowed" : "")}
+              className={cn("p-2! cursor-pointer rounded-md", activeItem.includes(action.id) ? "bg-gray-200 text-blue-600 dark:text-blue-600" : "", isPrimaryActionsDisabled ? "opacity-50 cursor-not-allowed" : "")}
               variant="ghost"
               onClick={() => handlePrimaryActionButtonClick(action.id)}
               disabled={isPrimaryActionsDisabled}

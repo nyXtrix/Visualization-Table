@@ -13,7 +13,14 @@ const TableCell = <TData,>({
 }: TableCellProps<TData>) => {
   const isPivot = cell.column.id.includes("|||");
   const value = cell.getValue();
-  
+  const table = cell.getContext().table;
+  const rowIndex = cell.row.index;
+  const isEven = rowIndex % 2 === 0;
+
+  const allColumns = table.getVisibleLeafColumns();
+  const colIndex = allColumns.findIndex((col) => col.id === cell.column.id);
+  const leftOffset = !isPivot ? colIndex * 200 : 0;
+
   const isNumber = (val: any) => {
     if (typeof val === "number") return true;
     if (typeof val === "string") {
@@ -25,23 +32,35 @@ const TableCell = <TData,>({
 
   const isNumericValue = isNumber(value);
 
+  const regularBg = isEven ? "bg-white" : "bg-gray-100";
+  const stickyBg = isEven ? "bg-gray-100" : "bg-gray-200";
+
   return (
     <td 
       style={{
-        left: !isPivot ? cell.column.getStart("left") : undefined,
+        left: !isPivot ? `${leftOffset}px` : undefined,
+        width: !isPivot ? '200px' : cell.column.getSize(),
+        minWidth: !isPivot ? '200px' : cell.column.columnDef.minSize,
       }}
       className={cn(
         "px-4 py-2 text-sm border-r border-b border-gray-300 whitespace-nowrap transition-colors",
         !isPivot 
-          ? "bg-gray-100 text-gray-800 font-medium sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" 
-          : "bg-white text-gray-600",
+          ? `${stickyBg} text-gray-800 font-medium shadow-sm` 
+          : `${regularBg} text-gray-600`,
         isNumericValue ? "text-right font-mono" : "text-left"
       )}
     >
-      {flexRender(
-        cell.column.columnDef.cell,
-        cell.getContext()
-      )}
+      <div className="flex items-center gap-2 overflow-hidden">
+        <span className={cn(
+          "truncate",
+          isNumericValue ? "text-right" : "text-left w-full leading-tight"
+        )}>
+          {!isPivot ? String(value ?? "") : flexRender(
+            cell.column.columnDef.cell,
+            cell.getContext()
+          )}
+        </span>
+      </div>
     </td>
   )
 }

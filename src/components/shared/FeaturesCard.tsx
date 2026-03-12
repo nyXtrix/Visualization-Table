@@ -35,7 +35,7 @@ const FeaturesCard = ({
       className={cn(
         "h-full hidden flex-col min-h-0 bg-white p-2 border gap-2",
         "transform transition-all duration-300 ease-in-out",
-        isOpen ? "flex w-full max-w-[15%] flex-shrink-0 z-30" : "",
+        isOpen ? "flex w-full max-w-[15%] shrink-0 z-30" : "",
       )}
     >
       <div className="flex justify-between flex-none items-center">

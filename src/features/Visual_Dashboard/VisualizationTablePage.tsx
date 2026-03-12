@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useAppSelector } from "@/store/hooks";
 import EmptyConfigState from "@/components/shared/EmptyConfigState";
 import Loader from "@/components/shared/Loader";
+import DisconnectedConfigState from "@/components/shared/DisconnectedConfigState";
 
 interface VisualizationTableProps<TData> {
   data: TData[];
@@ -33,12 +34,17 @@ const VisualizationTablePage = <TData,>({
             <EmptyConfigState />
           </div>
         )}
+        {tableState === "DISCONNECTED_DATASETS" && (
+          <div className="p-4 flex-1">
+            <DisconnectedConfigState />
+          </div>
+        )}
         {tableState === "CONFIG_ASSIGNED" && (
           <div className="flex-1 min-h-0 relative">
             <DataTable data={data} columns={columns} />
             {loading && (
-              <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-50 animate-in fade-in duration-200">
-                <Loader  fullPage/>
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-50 animate-in fade-in duration-200 pointer-events-none">
+                <Loader />
               </div>
             )}
           </div>

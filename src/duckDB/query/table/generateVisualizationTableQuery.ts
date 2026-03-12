@@ -19,16 +19,27 @@ export async function generateVisualizationTableQuery({
   values: valFields,
 }: VisualizationTableConfig) {
 
+  const q = (name: string) => `"${name.replace(/"/g, '""')}"`;
+
   const normalize = (f: VisualizationField | string): string => {
-    if (typeof f === 'string') return f;
-    return f.tableName && f.name ? `${f.tableName}.${f.name}` : f.name || String(f);
-  };
+  if (typeof f === "string") return f;
+
+  if (f.tableName && f.name) {
+    return `${q(f.tableName)}.${q(f.name)}`;
+  }
+
+  return q(f.name || String(f));
+};
 
   const safeRows = (rowFields || []).map(normalize);
   const safeColumns = (colFields || []).map(normalize);
   const safeValues = (valFields || []).map(normalize);
 
-  const allFields = [...safeRows, ...safeColumns, ...safeValues];
+  const allFields = [
+  ...(rowFields || []).map(f => `${f.tableName}.${f.name}`),
+  ...(colFields || []).map(f => `${f.tableName}.${f.name}`),
+  ...(valFields || []).map(f => `${f.tableName}.${f.name}`)
+];
   
   const firstTable = [...(rowFields || []), ...(colFields || []), ...(valFields || [])]
     .find(f => typeof f === 'object' && f?.tableName)?.tableName;
@@ -48,6 +59,14 @@ export async function generateVisualizationTableQuery({
 
   const tables = extractTablesFromFields(allFields);
   const joins = resolveJoinPath(baseTable, tables);
+  
+  const reachableTables = new Set([baseTable, ...joins.map(j => j.toTable)]);
+  for (const table of tables) {
+    if (!reachableTables.has(table)) {
+      throw new Error("DISCONNECTED_DATASETS");
+    }
+  }
+
   const joinSQL = buildJoinSQL(joins);
 
   let selectFields: string[] = [];
@@ -55,7 +74,7 @@ export async function generateVisualizationTableQuery({
 
   const getAggSQL = (field: VisualizationField, condition?: string): string => {
     const agg = field.aggregation || "sum";
-    const fieldFullName = `${field.tableName}.${field.name}`;
+    const fieldFullName = `${q(field.tableName)}.${q(field.name)}`;
     const sqlFunc = AGGREGATION_SQL_MAPPING[agg as keyof typeof AGGREGATION_SQL_MAPPING] || "SUM";
 
     let baseExpr = fieldFullName;
@@ -152,15 +171,13 @@ export async function generateVisualizationTableQuery({
 
   let query = `
     SELECT ${selectFields.join(", ")}
-    FROM ${baseTable}
+    FROM ${q(baseTable)}
     ${joinSQL}
   `;
 
   if (groupFields.length) {
     query += ` GROUP BY ${groupFields.join(", ")}`;
   }
-
-  console.log("QUERY:", query);
 
   return query;
 }

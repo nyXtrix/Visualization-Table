@@ -16,7 +16,7 @@ export async function initDuckDB() {
   const worker = new Worker(bundle.mainWorker!);
   
   db = new duckdb.AsyncDuckDB(logger, worker);
-  await db.instantiate(bundle.mainModule, bundle.mainModule);
+  await db.instantiate(bundle.mainModule);
   connection = await db.connect();
 
   return { db, connection }

@@ -29,4 +29,4 @@ export interface Dataset {
   tableName: string;
 }
 
-export type TableState = "NO_DATA" | "CONFIG_EMPTY" | "CONFIG_ASSIGNED";
+export type TableState = "NO_DATA" | "CONFIG_EMPTY" | "CONFIG_ASSIGNED" | "DISCONNECTED_DATASETS";

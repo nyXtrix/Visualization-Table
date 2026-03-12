@@ -1,5 +1,4 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import Button from '../ui/Button';
 import IconButton from '../ui/IconButton';
@@ -30,8 +29,8 @@ const ConfirmationModal = ({
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
-  return createPortal(
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6">
+  return (
+    <div className="fixed inset-0 z-1000 flex items-center justify-center p-4 sm:p-6">
       <div 
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-200" 
         onClick={onClose}
@@ -90,9 +89,8 @@ const ConfirmationModal = ({
           </Button>
         </div>
       </div>
-    </div>,
-    document.body
-  );
+    </div>
+      );
 };
 
 export default ConfirmationModal;

@@ -4,15 +4,20 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { generateVisualizationTableQuery } from "@/duckDB/query/table/generateVisualizationTableQuery";
 import { executeQuery } from "@/duckDB/query/executor/queryExecutor";
 import { setTableState } from "@/store/uiSlice";
+import { useToast } from "@/hooks/useToast";
 import { buildColumnDefinitions } from "@/utils/columnBuilder";
 import type { VisualizationTableState } from "@/types/visual";
 import type { ColumnDef } from "@tanstack/react-table";
 
 export function useVisualizationTableQuery() {
-  const [tableResult, setTableResult] = useState<{ data: Record<string, unknown>[]; columns: ColumnDef<unknown>[] }>({ data: [], columns: [] });
+  const [tableResult, setTableResult] = useState<{ 
+    data: Record<string, unknown>[]; 
+    columns: ColumnDef<unknown>[];
+  }>({ data: [], columns: [] });
   const [loading, setLoading] = useState(false);
   
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
   const datasets = useAppSelector((state) => state.dataset.datasets);
   const visual = useAppSelector((state) => state.visual);
   const debouncedVisual = useDebounce<VisualizationTableState>(visual, 300);
@@ -44,19 +49,26 @@ export function useVisualizationTableQuery() {
         const allKeys = result.length > 0 ? Object.keys(result[0]) : [];
         const colDefinitions = buildColumnDefinitions(allKeys, debouncedVisual);
         
-        // Single state update to prevent double render
         setTableResult({ data: result, columns: colDefinitions });
         
         dispatch(setTableState("CONFIG_ASSIGNED"));
-      } catch (error) {
-        console.error("Visualization Table Query Error:", error);
+      } catch (error: unknown) {
+        if (error instanceof Error && error.message === "DISCONNECTED_DATASETS") {
+          dispatch(setTableState("DISCONNECTED_DATASETS"));
+        } else {
+          showToast({
+            type: "error",
+            message: "Table Execution Error",
+            description: error instanceof Error ? error.message : "An unexpected error occurred",
+          });
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [debouncedVisual, datasets, dispatch]);
+  }, [debouncedVisual, datasets]);
 
   return { data: tableResult.data, columns: tableResult.columns, loading };
 }

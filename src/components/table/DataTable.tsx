@@ -1,9 +1,11 @@
-import { memo } from "react"
+import { memo, useState } from "react"
 import {
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
+  getExpandedRowModel,
   type ColumnDef,
+  type ExpandedState,
 } from "@tanstack/react-table"
 
 import TableHeader from "./TableHeader"
@@ -11,20 +13,26 @@ import TableBody from "./TableBody"
 import Pagination from "./Pagination"
 
 interface DataTableProps<TData> {
-  data: TData[]
-  columns: ColumnDef<TData>[]
+  data: TData[];
+  columns: ColumnDef<TData>[];
 }
 
 function DataTable<TData>({
   data,
-  columns
+  columns,
 }: DataTableProps<TData>) {
+  const [expanded, setExpanded] = useState<ExpandedState>({})
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    state: {
+      expanded,
+    },
+    onExpandedChange: setExpanded,
     initialState: {
       pagination: {
         pageSize: 20,
