@@ -7,7 +7,6 @@ import IconButton from "@/components/ui/IconButton";
 import TooltipWrapper from "@/components/ui/TooltipWrapper";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
 import { useTheme } from "@/context/ThemeContext";
 
 interface SidebarProps {
