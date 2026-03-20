@@ -44,7 +44,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   return (
     <div className="flex flex-col gap-2 w-full max-w-md">
       {label && (
-        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</label>
       )}
 
       <Input
@@ -60,7 +60,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           "flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-lg p-8 cursor-pointer transition-all",
           isDragging
             ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50",
+            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/60 dark:hover:border-amber-500 dark:border-gray-500",
         )}
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
@@ -73,12 +73,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         {Icon && <Icon className="h-8 w-8 text-gray-400" />}
 
         {!fileName ? (<div className="text-center">
-          <p className="text-sm font-medium text-gray-700">{title}</p>
-          <p className="text-xs text-gray-500">{description}</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
         </div>):
 
          (
-          <div className="flex items-start gap-2 text-xs text-gray-600 bg-gray-100 px-3 py-1 rounded">
+          <div className="flex items-start gap-2 text-xs text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 px-3 py-1 rounded">
             <FileText className="h-4 w-4" />
             {fileName}
           </div>

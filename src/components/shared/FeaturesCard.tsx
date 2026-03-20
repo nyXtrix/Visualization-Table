@@ -16,6 +16,8 @@ interface FeaturesCardProps {
   enableAddIcon?: boolean;
   onAddClick?: () => void;
   onSearch?: (value: string) => void;
+  addBtnTooltipTitle?:string;
+  addBtnTooltipPostion?: 'top' | 'bottom' | 'left' | 'right'
 }
 
 const FeaturesCard = ({
@@ -29,11 +31,13 @@ const FeaturesCard = ({
   enableAddIcon = false,
   onAddClick,
   onSearch,
+  addBtnTooltipTitle = "Add",
+  addBtnTooltipPostion = 'top',
 }: FeaturesCardProps) => {
   return (
     <div
       className={cn(
-        "h-full hidden flex-col min-h-0 bg-white p-2 border gap-2",
+        "h-full hidden flex-col min-h-0 bg-white p-2 border gap-2 dark:bg-gray-900/90 dark:text-gray-300 dark:border-gray-700",
         "transform transition-all duration-300 ease-in-out",
         isOpen ? "flex w-full max-w-[15%] shrink-0 z-30" : "",
       )}
@@ -43,12 +47,14 @@ const FeaturesCard = ({
         <div className="flex items-center">
           {enableAddIcon && (
             <div className="flex items-center">
+              <TooltipWrapper title={addBtnTooltipTitle} position={addBtnTooltipPostion}>
               <IconButton
                 icon={Plus}
                 className="p-2 cursor-pointer"
                 variant="ghost"
                 onClick={onAddClick}
               />
+              </TooltipWrapper>
               <span className="h-full p-2 text-gray-400">|</span>
             </div>
           )}

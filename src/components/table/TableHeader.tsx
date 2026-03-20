@@ -7,42 +7,41 @@ interface TableHeaderProps<TData> {
 
 const TableHeader = <TData,>({ table }: TableHeaderProps<TData>) => {
   return (
-    <thead className="sticky top-0 z-20 select-none">
+    <thead className="z-20 select-none">
       {table.getHeaderGroups().map((headerGroup) => (
-         <tr key={headerGroup.id} className="bg-white">
+        <tr key={headerGroup.id} className="bg-white">
           {headerGroup.headers.map((header) => {
-            const isPivot = header.column.id.includes("|||");
-            const isPlaceholder = header.isPlaceholder;
-            const isGrouped = header.colSpan > 1;
-
+            const firstLeaf = header.column.getLeafColumns()[0];
+            const isRowHeader = (firstLeaf?.columnDef.meta as Record<string, any>)?.isRowHeader === true;
+            const isGrouped = !header.isPlaceholder && header.subHeaders && header.subHeaders.length > 0;
+            
             const allColumns = table.getVisibleLeafColumns();
-            const colIndex = allColumns.findIndex((col) => col.id === header.column.id);
-            const leftOffset = !isPivot ? colIndex * 200 : 0;
+            const colIndex = allColumns.findIndex(
+              (col) => col.id === firstLeaf?.id,
+            );
+            const leftOffset = isRowHeader ? colIndex * 200 : 0;
 
             return (
               <th
                 key={header.id}
                 colSpan={header.colSpan}
                 style={{
-                  left: !isPivot ? `${leftOffset}px` : undefined,
-                  width: !isPivot ? '200px' : header.column.getSize(),
+                  left: isRowHeader ? `${leftOffset}px` : undefined,
+                  width: isRowHeader ? "200px" : header.column.getSize(),
+                  minWidth: isRowHeader ? "200px" : header.column.getSize(),
                 }}
                 className={cn(
-                  "px-4 py-3 text-xs uppercase tracking-wider font-bold border-r border-b border-gray-400/30 last:border-r-0 whitespace-nowrap transition-colors",
-                  !isPivot 
-                    ? "bg-gray-300 text-gray-900 shadow-sm" 
-                    : (isGrouped ? "bg-gray-300 text-gray-900" : "bg-gray-50 text-gray-600"),
-                  isPlaceholder 
-                    ? "bg-gray-200" 
-                    : "",
-                  isGrouped ? "text-center" : "text-left"
+                  "px-4 py-3 text-xs uppercase tracking-wider font-bold border-r transition-colors border-gray-300 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600",
+                  header.isPlaceholder ? "border-b-0" : "border-b",
+                  isRowHeader ? "sticky left-0 z-30" : "",
+                  isGrouped ? "text-center" : "text-left",
+                  header.isPlaceholder ? "text-transparent" : "text-gray-800"
                 )}
               >
-                {!isPlaceholder &&
-                  flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
+                {!header.isPlaceholder && flexRender(
+                  header.column.columnDef.header,
+                  header.getContext(),
+                )}
               </th>
             );
           })}

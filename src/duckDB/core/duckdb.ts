@@ -1,5 +1,5 @@
-import { DUCKDB_BUNDLES } from "@/constant/utils";
 import * as duckdb from "@duckdb/duckdb-wasm"
+import { DUCKDB_BUNDLES } from "@/constant/utils";
 
 
 

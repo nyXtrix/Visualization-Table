@@ -13,17 +13,16 @@ export const buildColumnDefinitions = (
   const { rows, values } = visualizationState;
   const rowKeyStrings = rows.map((r) => `${r.tableName}.${r.name}`);
   
-  const rowKeys = allKeys.filter((k) => rowKeyStrings.includes(k));
   const visualizationKeys = allKeys.filter((k) => !rowKeyStrings.includes(k));
 
-  const rowCols = rowKeys.map((k) => {
-    const fieldName = k.split(".").pop() || k;
-    return {
-      id: k,
-      accessorFn: (row: Record<string, unknown>) => row[k],
-      header: FormatedFieldName(fieldName),
-    };
-  });
+  const rowCols = rows.length > 0 
+    ? [{
+        id: "rowLabels",
+        accessorKey: "rowLabel",
+        header: rows.length === 1 ? FormatedFieldName(rows[0].name) : "Row Labels",
+        meta: { isRowHeader: true },
+      }]
+    : [];
 
   const buildTree = (keys: string[]) => {
     const root: any[] = [];
@@ -62,5 +61,19 @@ export const buildColumnDefinitions = (
   };
 
   const leafCols = buildTree(visualizationKeys);
-  return [...rowCols, ...leafCols];
+
+  const hasPivotColumns = visualizationState.columns.length > 0;
+  
+  const grandTotalCol = hasPivotColumns && values.length > 0 ? [{
+    id: "GRAND_TOTAL|||",
+    accessorFn: (row: Record<string, unknown>) => {
+      return visualizationKeys.reduce((sum, key) => {
+        const val = row[key];
+        return sum + (typeof val === 'number' ? val : 0);
+      }, 0);
+    },
+    header: "Grand Total",
+  }] : [];
+
+  return [...rowCols, ...grandTotalCol, ...leafCols];
 };

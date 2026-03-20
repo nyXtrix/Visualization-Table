@@ -10,6 +10,9 @@ import {
   removeColumn,
   removeValue,
   updateValueAggregation,
+  reorderRow,
+  reorderColumn,
+  reorderValue,
 } from "@/store/visualSlice";
 import type { AggregationType } from "@/types/visual";
 
@@ -29,16 +32,28 @@ const VisualisationCard = ({
 
   const { rows, columns, values } = useAppSelector((state) => state.visual);
 
-  const handleRowDrop = useCallback((fieldName: string, tableName: string, type?: string) => {
-    dispatch(addRow({ name: fieldName, tableName, type }));
+  const handleRowDrop = useCallback((fieldName: string, tableName: string, type?: string, index?: number) => {
+    dispatch(addRow({ name: fieldName, tableName, type, index }));
   }, [dispatch]);
 
-  const handleColumnDrop = useCallback((fieldName: string, tableName: string, type?: string) => {
-    dispatch(addColumn({ name: fieldName, tableName, type }));
+  const handleColumnDrop = useCallback((fieldName: string, tableName: string, type?: string, index?: number) => {
+    dispatch(addColumn({ name: fieldName, tableName, type, index }));
   }, [dispatch]);
 
-  const handleValueDrop = useCallback((fieldName: string, tableName: string, type?: string) => {
-    dispatch(addValue({ name: fieldName, tableName, type }));
+  const handleValueDrop = useCallback((fieldName: string, tableName: string, type?: string, index?: number) => {
+    dispatch(addValue({ name: fieldName, tableName, type, index }));
+  }, [dispatch]);
+
+  const handleRowReorder = useCallback((oldIndex: number, newIndex: number) => {
+    dispatch(reorderRow({ oldIndex, newIndex }));
+  }, [dispatch]);
+
+  const handleColumnReorder = useCallback((oldIndex: number, newIndex: number) => {
+    dispatch(reorderColumn({ oldIndex, newIndex }));
+  }, [dispatch]);
+
+  const handleValueReorder = useCallback((oldIndex: number, newIndex: number) => {
+    dispatch(reorderValue({ oldIndex, newIndex }));
   }, [dispatch]);
 
   const handleRemoveRow = useCallback((index: number) => {
@@ -72,7 +87,7 @@ const VisualisationCard = ({
 
   return (
     <FeaturesCard
-      title="Visualisation"
+      title="Visualization"
       isOpen={isOpen}
       handleCloseClick={handleCloseCardClick}
       childrenClassName="flex flex-col gap-3"
@@ -83,6 +98,7 @@ const VisualisationCard = ({
         title="Rows"
         fields={mappedRows}
         handleDropField={handleRowDrop}
+        handleReorderField={handleRowReorder}
         handleRemoveField={handleRemoveRow}
       />
 
@@ -90,6 +106,7 @@ const VisualisationCard = ({
         title="Columns"
         fields={mappedCols}
         handleDropField={handleColumnDrop}
+        handleReorderField={handleColumnReorder}
         handleRemoveField={handleRemoveColumn}
       />
 
@@ -97,6 +114,7 @@ const VisualisationCard = ({
         title="Values"
         fields={mappedVals}
         handleDropField={handleValueDrop}
+        handleReorderField={handleValueReorder}
         handleRemoveField={handleRemoveValue}
         onUpdateAggregation={handleUpdateValueAggregation}
       />

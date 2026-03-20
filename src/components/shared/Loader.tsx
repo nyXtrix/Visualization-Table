@@ -33,7 +33,7 @@ const Loader: React.FC<LoaderProps> = ({
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-9999 flex items-center justify-center bg-white/50 backdrop-blur-[2px] pointer-events-none">
+      <div className="fixed inset-0 z-9999 flex items-center justify-center bg-white/50 dark:bg-gray-700/50 backdrop-blur-[2px] pointer-events-none">
         {loader}
       </div>
     );

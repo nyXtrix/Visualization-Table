@@ -2,27 +2,18 @@ import { initDuckDB } from "./duckdb";
 import * as duckdb from "@duckdb/duckdb-wasm";
 
 export async function csvLoader(file: File): Promise<string> {
-  const { connection, db } = await initDuckDB();
+  const { connection, db } = await initDuckDB()
 
   const tableName = file.name
     .replace(".csv", "")
     .replace(/[^a-zA-Z0-9_]/g, "_")
-    .replace(/^\uFEFF/, '');
 
-  const buffer = await file.arrayBuffer();
+  const buffer = await file.arrayBuffer()
 
-  let text:string;
-  try{
-    const decoder = new TextDecoder('utf-8', {fatal:true});
-    text = decoder.decode(buffer);
-  }
-  catch{
-    text = new TextDecoder('windows-1252').decode(buffer)
-  }
-  // const decoder = new TextDecoder("windows-1252");
-  // const text = decoder.decode(buffer);
+  const decoder = new TextDecoder("utf-8")
+  const text = decoder.decode(buffer)
 
-  const utf8File = new File([text], file.name, { type: "text/csv" });
+  const utf8File = new File([text], file.name, { type: "text/csv" })
 
   await db.registerFileHandle(
     utf8File.name,
@@ -34,8 +25,14 @@ export async function csvLoader(file: File): Promise<string> {
   await connection.query(`
     CREATE TABLE "${tableName}" AS
     SELECT *
-    FROM read_csv_auto('${utf8File.name}', IGNORE_ERRORS=true)
-  `);
+    FROM read_csv(
+      '${utf8File.name}',
+      header=true,
+      delim=',',
+      sample_size=1024,
+      ignore_errors=true
+    )
+  `)
 
-  return tableName;
+  return tableName
 }

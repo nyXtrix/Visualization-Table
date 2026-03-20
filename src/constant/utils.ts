@@ -4,7 +4,7 @@ import type { AggregationType } from "@/types/visual";
 
 export const SIDEBAR_PRIMARY_ACTIONS: SidebarActionType[] = [
   { id: "data", title: "Data", icon: Database },
-  { id: "visualisation", title: "Visualisation", icon: ChartBarIncreasing },
+  { id: "visualization", title: "Visualization", icon: ChartBarIncreasing },
 ];
 
 export const SIDEBAR_SECONDARY_ACTIONS: SidebarActionType[] = [

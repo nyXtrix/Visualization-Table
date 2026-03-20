@@ -12,28 +12,36 @@ const visualSlice = createSlice({
   name: "visual",
   initialState,
   reducers: {
-    addRow(state, action: PayloadAction<VisualizationField>) {
-      const { name, tableName } = action.payload;
+    addRow(state, action: PayloadAction<VisualizationField & { index?: number }>) {
+      const { name, tableName, index } = action.payload;
       
       state.rows = state.rows.filter(f => f.name !== name || f.tableName !== tableName);
       state.columns = state.columns.filter(f => f.name !== name || f.tableName !== tableName);
       state.values = state.values.filter(f => f.name !== name || f.tableName !== tableName);
       
-      state.rows.push(action.payload);
+      if (typeof index === 'number' && index >= 0) {
+        state.rows.splice(index, 0, action.payload);
+      } else {
+        state.rows.push(action.payload);
+      }
     },
 
-    addColumn(state, action: PayloadAction<VisualizationField>) {
-      const { name, tableName } = action.payload;
+    addColumn(state, action: PayloadAction<VisualizationField & { index?: number }>) {
+      const { name, tableName, index } = action.payload;
 
       state.rows = state.rows.filter(f => f.name !== name || f.tableName !== tableName);
       state.columns = state.columns.filter(f => f.name !== name || f.tableName !== tableName);
       state.values = state.values.filter(f => f.name !== name || f.tableName !== tableName);
       
-      state.columns.push(action.payload);
+      if (typeof index === 'number' && index >= 0) {
+        state.columns.splice(index, 0, action.payload);
+      } else {
+        state.columns.push(action.payload);
+      }
     },
 
-    addValue(state, action: PayloadAction<VisualizationField>) {
-      const { name, tableName, type } = action.payload;
+    addValue(state, action: PayloadAction<VisualizationField & { index?: number }>) {
+      const { name, tableName, type, index } = action.payload;
 
       state.rows = state.rows.filter(f => f.name !== name || f.tableName !== tableName);
       state.columns = state.columns.filter(f => f.name !== name || f.tableName !== tableName);
@@ -51,7 +59,12 @@ const visualSlice = createSlice({
         defaultAgg = "count";
       }
 
-      state.values.push({ ...action.payload, aggregation: defaultAgg });
+      const newValue = { ...action.payload, aggregation: defaultAgg };
+      if (typeof index === 'number' && index >= 0) {
+        state.values.splice(index, 0, newValue);
+      } else {
+        state.values.push(newValue);
+      }
     },
 
     updateValueAggregation(state, action: PayloadAction<{ index: number, aggregation: AggregationType }>) {
@@ -109,6 +122,23 @@ const visualSlice = createSlice({
         }
       }
     },
+    reorderRow(state, action: PayloadAction<{ oldIndex: number, newIndex: number }>) {
+      const { oldIndex, newIndex } = action.payload;
+      const [removed] = state.rows.splice(oldIndex, 1);
+      state.rows.splice(newIndex, 0, removed);
+    },
+
+    reorderColumn(state, action: PayloadAction<{ oldIndex: number, newIndex: number }>) {
+      const { oldIndex, newIndex } = action.payload;
+      const [removed] = state.columns.splice(oldIndex, 1);
+      state.columns.splice(newIndex, 0, removed);
+    },
+
+    reorderValue(state, action: PayloadAction<{ oldIndex: number, newIndex: number }>) {
+      const { oldIndex, newIndex } = action.payload;
+      const [removed] = state.values.splice(oldIndex, 1);
+      state.values.splice(newIndex, 0, removed);
+    },
   },
 });
 
@@ -122,6 +152,9 @@ export const {
   removeValue,
   resetConfig,
   checkField,
+  reorderRow,
+  reorderColumn,
+  reorderValue,
 } = visualSlice.actions;
 
 export default visualSlice.reducer;

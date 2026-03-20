@@ -22,6 +22,7 @@ const VisualDashboardManagement = () => {
 
   const { data, columns, loading: queryLoading } = useVisualizationTableQuery();
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleFileUpload = useCallback(async (file: File | null) => {
     if (!file) return;
@@ -31,7 +32,9 @@ const VisualDashboardManagement = () => {
       const isFirstUpload = datasets.length === 0;
       const tableName = await csvLoader(file);
       const cols = await getTableColumns(tableName);
-      dispatch(setTableState("CONFIG_EMPTY"));
+      if (isFirstUpload) {
+        dispatch(setTableState("CONFIG_EMPTY"));
+      }
 
       dispatch(
         addDataset({
@@ -47,7 +50,7 @@ const VisualDashboardManagement = () => {
       );
 
       if (isFirstUpload) {
-        setActiveItems(["data", "visualisation"]);
+        setActiveItems(["data", "visualization"]);
       }
     } finally {
       setUploadLoading(false);
@@ -62,10 +65,11 @@ const VisualDashboardManagement = () => {
   }, []);
 
   const isDataOpen = activeItems.includes("data");
-  const isVisualisationOpen = activeItems.includes("visualisation");
-
+  const isVisualisationOpen = activeItems.includes("visualization");
+  
   return (
     <>
+      {uploadLoading && datasets.length === 0 && <Loader fullPage />}
       <ConfirmationModal
         isOpen={showExitModal}
         onClose={() => setShowExitModal(false)}
@@ -76,14 +80,15 @@ const VisualDashboardManagement = () => {
         cancelText="Stay"
         variant="danger"
       />
-      {uploadLoading && <Loader fullPage />}
       <AppLayout
         activeItems={activeItems}
         handlePrimaryActionButtonClick={handlePrimaryActionButtonClick}
         isSidebarPrimaryActionsEnabled={datasets.length > 0}
+        isSettingsOpen={isSettingsOpen}
+        setIsSettingsOpen={setIsSettingsOpen}
       >
         <div className="bg-white dark:bg-black flex h-full w-full overflow-hidden">
-          <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30 dark:border dark:border-white/20 dark:bg-black">
+          <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30 dark:border dark:border-gray-600 dark:bg-gray-900/90">
             <Suspense fallback={<Loader fullPage/>}>
               <VisualizationTablePage
                 data={data}
@@ -109,6 +114,7 @@ const VisualDashboardManagement = () => {
               isOpen={isDataOpen}
               handleCardCloseClick={handlePrimaryActionButtonClick}
               onFileUpload={handleFileUpload}
+              isLoading={uploadLoading}
             />
           </Suspense>
         </div>

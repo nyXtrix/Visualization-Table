@@ -30,3 +30,10 @@ export interface Dataset {
 }
 
 export type TableState = "NO_DATA" | "CONFIG_EMPTY" | "CONFIG_ASSIGNED" | "DISCONNECTED_DATASETS";
+
+export type VisualizationRow = Record<
+  string,
+  string | number | boolean | null | undefined
+> & {
+  isGrandTotal?: boolean;
+};

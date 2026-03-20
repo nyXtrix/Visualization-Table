@@ -6,6 +6,7 @@ import { executeQuery } from "@/duckDB/query/executor/queryExecutor";
 import { setTableState } from "@/store/uiSlice";
 import { useToast } from "@/hooks/useToast";
 import { buildColumnDefinitions } from "@/utils/columnBuilder";
+import { buildRowHierarchy } from "@/utils/rowBuilder";
 import type { VisualizationTableState } from "@/types/visual";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -45,11 +46,12 @@ export function useVisualizationTableQuery() {
         });
 
         const result = await executeQuery(query);
+        const hierarchicalData = buildRowHierarchy(result, rows);
 
         const allKeys = result.length > 0 ? Object.keys(result[0]) : [];
         const colDefinitions = buildColumnDefinitions(allKeys, debouncedVisual);
         
-        setTableResult({ data: result, columns: colDefinitions });
+        setTableResult({ data: hierarchicalData, columns: colDefinitions });
         
         dispatch(setTableState("CONFIG_ASSIGNED"));
       } catch (error: unknown) {
@@ -68,7 +70,7 @@ export function useVisualizationTableQuery() {
     };
 
     fetchData();
-  }, [debouncedVisual, datasets]);
+  }, [debouncedVisual]);
 
   return { data: tableResult.data, columns: tableResult.columns, loading };
 }

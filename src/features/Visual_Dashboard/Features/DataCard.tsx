@@ -3,6 +3,7 @@ import DatasetTree from '@/components/shared/DatasetTree'
 import type { Dataset } from '@/types/visual'
 import FeaturesCard from '@/components/shared/FeaturesCard'
 import Input from '@/components/inputs/Input';
+import Loader from '@/components/shared/Loader';
 
 interface DataCardProps{
   id:string;
@@ -10,9 +11,10 @@ interface DataCardProps{
   dataset:Dataset[];
   handleCardCloseClick:(id:string) => void;
   onFileUpload: (file: File | null) => void;
+  isLoading?: boolean;
 }
 
-const DataCard = ({dataset, id, isOpen, handleCardCloseClick, onFileUpload}:DataCardProps) => {
+const DataCard = ({dataset, id, isOpen, handleCardCloseClick, onFileUpload, isLoading}:DataCardProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -48,6 +50,7 @@ const DataCard = ({dataset, id, isOpen, handleCardCloseClick, onFileUpload}:Data
       enableAddIcon
       onAddClick={handleAddClick}
       onSearch={handleSearch}
+      addBtnTooltipTitle='Add new dataset'
     >
         <Input
           type="file"
@@ -56,7 +59,14 @@ const DataCard = ({dataset, id, isOpen, handleCardCloseClick, onFileUpload}:Data
           accept=".csv"
           className="hidden"
         />
-        <DatasetTree datasets={filteredDatasets} isSearchActive={searchTerm !== ""}/>
+        <div className="relative flex-1 min-h-0">
+          <DatasetTree datasets={filteredDatasets} isSearchActive={searchTerm !== ""}/>
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10 animate-in fade-in duration-200">
+              <Loader />
+            </div>
+          )}
+        </div>
     </FeaturesCard>
   )
 }

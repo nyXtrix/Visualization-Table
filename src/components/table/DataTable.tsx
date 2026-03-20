@@ -21,7 +21,7 @@ function DataTable<TData>({
   data,
   columns,
 }: DataTableProps<TData>) {
-  const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [expanded, setExpanded] = useState<ExpandedState>(true)
 
   const table = useReactTable({
     data,
@@ -29,6 +29,7 @@ function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row: any) => row.subRows,
     state: {
       expanded,
     },
@@ -42,7 +43,7 @@ function DataTable<TData>({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden rounded-md border">
-      <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+      <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 dark:scrollbar-thumb-gray-900 dark:scrollbar-track-gray-500">
         <table className="w-max min-w-full border-separate border-spacing-0 table-auto">
           <TableHeader table={table} />
           <TableBody table={table} />

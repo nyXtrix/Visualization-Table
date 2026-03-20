@@ -4,6 +4,7 @@ import { CalendarDays, Sigma } from "lucide-react";
 import Input from "../inputs/Input";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { checkField } from "@/store/visualSlice";
+import { cn } from "@/lib/utils";
 
 interface FieldItemProps {
   field: Field;
@@ -46,22 +47,26 @@ const DataFieldItem = ({ field, tableName }: FieldItemProps) => {
 
   return (
     <div
-      className="px-2 py-1 flex items-center gap-2 text-xs w-full rounded hover:bg-gray-100 cursor-pointer text-gray-700 group"
+      className={cn(
+        "px-2 py-1 flex items-center gap-2 text-xs w-full rounded hover:bg-gray-100 cursor-pointer text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 group",
+        "transition-all duration-200 hover:shadow-sm hover:translate-x-0.5",
+        "active:bg-gray-200 active:translate-x-0"
+      )}
       draggable
       onDragStart={handleDragStart}
     >
       <div className="flex items-center gap-2 w-full min-w-0">
-        <div className="flex-shrink-0 flex items-center">
+        <div className="shrink-0 flex items-center">
           <Input 
             type="checkbox" 
-            checked={isChecked}
+          checked={isChecked}
             onChange={handleCheckboxChange}
-            className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            className="h-4 w-4 rounded border-gray-300 checkbox-custom-style focus:ring-blue-500 dark:focus:ring-amber-500 focus:border-none"
           />
         </div>
         
         <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden" onClick={handleCheckboxChange}>
-          <div className="flex-shrink-0 flex justify-center items-center">
+          <div className="shrink-0 flex justify-center items-center">
             {isNumeric(field.type) && (
               <Sigma className="w-3.5 h-3.5 text-gray-500" strokeWidth={2.5} />
             )}

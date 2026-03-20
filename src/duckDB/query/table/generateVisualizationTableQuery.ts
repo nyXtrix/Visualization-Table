@@ -31,15 +31,17 @@ export async function generateVisualizationTableQuery({
   return q(f.name || String(f));
 };
 
-  const safeRows = (rowFields || []).map(normalize);
+  const safeRows = (rowFields || []).map(f => `${q(f.tableName)}.${q(f.name)} AS ${q(f.tableName + "." + f.name)}`);
   const safeColumns = (colFields || []).map(normalize);
   const safeValues = (valFields || []).map(normalize);
 
+  const rowGroupFields = (rowFields || []).map(normalize);
+
   const allFields = [
-  ...(rowFields || []).map(f => `${f.tableName}.${f.name}`),
-  ...(colFields || []).map(f => `${f.tableName}.${f.name}`),
-  ...(valFields || []).map(f => `${f.tableName}.${f.name}`)
-];
+    ...(rowFields || []).map(f => `${f.tableName}.${f.name}`),
+    ...(colFields || []).map(f => `${f.tableName}.${f.name}`),
+    ...(valFields || []).map(f => `${f.tableName}.${f.name}`)
+  ];
   
   const firstTable = [...(rowFields || []), ...(colFields || []), ...(valFields || [])]
     .find(f => typeof f === 'object' && f?.tableName)?.tableName;
@@ -105,7 +107,7 @@ export async function generateVisualizationTableQuery({
 
   if (safeRows.length && !safeColumns.length && !safeValues.length) {
     selectFields = [...safeRows];
-    groupFields = [...safeRows];
+    groupFields = [...rowGroupFields];
   }
 
   else if (!safeRows.length && !safeColumns.length && valFields.length) {
@@ -122,7 +124,7 @@ export async function generateVisualizationTableQuery({
       ),
     ];
 
-    groupFields = [...safeRows];
+    groupFields = [...rowGroupFields];
   }
 
   else if (safeColumns.length) {
@@ -162,7 +164,7 @@ export async function generateVisualizationTableQuery({
     });
 
     selectFields = [...safeRows, ...visualizationColumns];
-    groupFields = [...safeRows];
+    groupFields = [...rowGroupFields];
   }
 
   if (!selectFields.length) {
