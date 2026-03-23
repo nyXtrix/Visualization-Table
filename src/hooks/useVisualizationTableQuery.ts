@@ -46,9 +46,9 @@ export function useVisualizationTableQuery() {
         });
 
         const result = await executeQuery(query);
-        const hierarchicalData = buildRowHierarchy(result, rows);
+        const hierarchicalData = buildRowHierarchy(result, rows, values);
 
-        const allKeys = result.length > 0 ? Object.keys(result[0]) : [];
+        const allKeys = Array.from(new Set(result.flatMap(r => Object.keys(r))));
         const colDefinitions = buildColumnDefinitions(allKeys, debouncedVisual);
         
         setTableResult({ data: hierarchicalData, columns: colDefinitions });

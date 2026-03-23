@@ -4,6 +4,8 @@ import {
 } from "@tanstack/react-table"
 import { cn } from "@/lib/utils";
 import { ChevronRight, ChevronDown } from "lucide-react";
+import { formatDate } from "@/utils/dateFormatter";
+import { formatCompactNumber } from "@/utils/numberFormatter";
 
 interface TableCellProps<TData> {
   cell: Cell<TData, unknown>
@@ -14,24 +16,35 @@ const TableCell = <TData,>({
 }: TableCellProps<TData>) => {
   const isRowHeader = (cell.column.columnDef.meta as Record<string, any>)?.isRowHeader === true;
   const isRowLabelColumn = cell.column.id === "rowLabels" || (isRowHeader && cell.column.id === cell.row.getVisibleCells()[0].column.id);
-  const value = cell.getValue();
+  const rawValue = cell.getValue();
+  const value = (
+    rawValue === null || 
+    rawValue === undefined || 
+    String(rawValue).trim() === "" || 
+    String(rawValue) === "null" || 
+    String(rawValue) === "undefined" ||
+    String(rawValue) === "0" ||
+    (typeof rawValue === 'number' && isNaN(rawValue)) ||
+    rawValue === 0
+  ) ? "-" : rawValue;
   const table = cell.getContext().table;
 
   const allColumns = table.getVisibleLeafColumns();
   const colIndex = allColumns.findIndex((col) => col.id === cell.column.id);
   const leftOffset = isRowHeader ? colIndex * 200 : 0;
 
-  const isNumber = (val: any) => {
-    if (typeof val === "number") return true;
-    if (typeof val === "string") {
-      const trimmed = val.trim();
-      return trimmed !== "" && !isNaN(Number(trimmed));
-    }
-    return false;
-  };
+  const isDateColumn = (cell.column.columnDef.meta as any)?.isDate === true || 
+                       cell.column.id.toLowerCase().includes("date") || 
+                       cell.column.id.toLowerCase().includes("time");
+  const isNumericValue = typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)) && value !== "");
 
-  const isNumericValue = isNumber(value);
-
+  let displayValue: string = String(value);
+  if (isDateColumn || isRowLabelColumn || value instanceof Date) {
+    displayValue = formatDate(value as any);
+  } else if (isNumericValue) {
+    displayValue = formatCompactNumber(value);
+  }
+  
   const isParent = cell.row.getCanExpand();
   const localIndex = parseInt(cell.row.id.split('.').pop() || "0", 10);
 
@@ -54,7 +67,7 @@ const TableCell = <TData,>({
         isRowHeader 
           ? `${bgClass} sticky z-10 left-0 text-gray-800 font-medium` 
           : `${bgClass} text-gray-600`,
-        isNumericValue ? "text-right font-mono" : "text-left"
+        "text-left"
       )}
     >
       <div className="flex items-center gap-2 overflow-hidden">
@@ -70,13 +83,19 @@ const TableCell = <TData,>({
             )}
           </button>
         )}
-        <span className={cn(
-          "truncate",
-          isNumericValue ? "text-right" : "text-left w-full leading-tight"
-        )}>
-          {isRowHeader ? String(value ?? "") : flexRender(
-            cell.column.columnDef.cell,
-            cell.getContext()
+        <span 
+          className={cn(
+            "text-left leading-tight",
+            value === "-" ? "w-full px-1 flex justify-center" : "truncate w-full block",
+            isNumericValue ? "text-right font-mono" : "text-left"
+          )}
+        >
+          {isRowHeader ? String(displayValue) : (
+            value === "-" 
+              ? "-" 
+              : ((cell.column.columnDef.cell && !isNumericValue) 
+                  ? flexRender(cell.column.columnDef.cell, cell.getContext()) 
+                  : String(displayValue))
           )}
         </span>
       </div>

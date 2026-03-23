@@ -92,6 +92,12 @@ export async function generateVisualizationTableQuery({
       if (agg === "count") {
         return `COUNT(CASE WHEN ${condition} THEN 1 END)`;
       }
+      
+      if (["first", "last"].includes(agg)) {
+        const sqlFunc = agg === "first" ? "FIRST" : "LAST";
+        return `${sqlFunc}(${fieldFullName}) FILTER (WHERE ${condition} AND ${fieldFullName} IS NOT NULL)`;
+      }
+
       const elseValue = agg === "sum" ? "0" : "NULL";
       return `${sqlFunc}(CASE WHEN ${condition} THEN ${baseExpr} ELSE ${elseValue} END)`;
     } else {
@@ -100,6 +106,10 @@ export async function generateVisualizationTableQuery({
       }
       if (agg === "count") {
         return `COUNT(*)`;
+      }
+      if (["first", "last"].includes(agg)) {
+        const sqlFunc = agg === "first" ? "FIRST" : "LAST";
+        return `${sqlFunc}(${fieldFullName}) FILTER (WHERE ${fieldFullName} IS NOT NULL)`;
       }
       return `${sqlFunc}(${baseExpr})`;
     }
@@ -143,7 +153,7 @@ export async function generateVisualizationTableQuery({
           const val = comb[col];
           if (val === null) return `${col} IS NULL`;
           const escapedVal = String(val).replace(/'/g, "''");
-          return `${col} = '${escapedVal}'`;
+          return `CAST(${col} AS VARCHAR) = '${escapedVal}'`;
         })
         .join(" AND ");
 

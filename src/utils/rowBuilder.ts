@@ -1,4 +1,5 @@
 import type { VisualizationField } from "@/types/visual";
+import { aggregateValues, getVField } from "./aggregation";
 
 export interface HierarchicalRow extends Record<string, unknown> {
   subRows?: HierarchicalRow[];
@@ -8,7 +9,8 @@ export interface HierarchicalRow extends Record<string, unknown> {
 
 export const buildRowHierarchy = (
   flatData: Record<string, unknown>[],
-  rowFields: VisualizationField[]
+  rowFields: VisualizationField[],
+  valueFields: VisualizationField[] = []
 ): HierarchicalRow[] => {
   if (flatData.length === 0) return [];
   if (rowFields.length === 0) return flatData as HierarchicalRow[];
@@ -24,22 +26,23 @@ export const buildRowHierarchy = (
   allKeys.forEach((key) => {
     if (groupKeys.includes(key) || key === 'rowLabel' || key === 'rowDepth') return;
     
-    const sum = flatData.reduce((acc, row) => {
-      const val = row[key];
-      return acc + (typeof val === 'number' ? val : 0);
-    }, 0);
+    const vField = getVField(key, valueFields);
+    const aggValues = flatData.map(r => r[key]);
+    const result = aggregateValues(aggValues, vField?.aggregation);
     
-    if (!isNaN(sum)) grandTotalRow[key] = sum;
+    if (result !== undefined) grandTotalRow[key] = result;
   });
 
-  grandTotalRow.subRows = createHierarchy(flatData, groupKeys, 0);
+  grandTotalRow.subRows = createHierarchy(flatData, groupKeys, 0, valueFields);
 
   return [grandTotalRow];
 };
+
 const createHierarchy = (
   rows: Record<string, unknown>[],
   groupKeys: string[],
-  depth: number
+  depth: number,
+  valueFields: VisualizationField[]
 ): HierarchicalRow[] => {
   if (depth >= groupKeys.length) return [];
 
@@ -60,16 +63,15 @@ const createHierarchy = (
     Object.keys(parentRow).forEach(columnKey => {
       if (groupKeys.includes(columnKey) || columnKey === 'rowLabel' || columnKey === 'rowDepth') return;
 
-      const sum = matchingRows.reduce((acc, row) => {
-        const val = row[columnKey];
-        return acc + (typeof val === 'number' ? val : 0);
-      }, 0);
+      const vField = getVField(columnKey, valueFields);
+      const aggValues = matchingRows.map(r => r[columnKey]);
+      const result = aggregateValues(aggValues, vField?.aggregation);
 
-      if (!isNaN(sum)) parentRow[columnKey] = sum;
+      if (result !== undefined) parentRow[columnKey] = result;
     });
 
     if (depth < groupKeys.length - 1) {
-      parentRow.subRows = createHierarchy(matchingRows, groupKeys, depth + 1);
+      parentRow.subRows = createHierarchy(matchingRows, groupKeys, depth + 1, valueFields);
     }
 
     hierarchy.push(parentRow);

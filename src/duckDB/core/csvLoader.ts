@@ -1,5 +1,6 @@
 import { initDuckDB } from "./duckdb";
 import * as duckdb from "@duckdb/duckdb-wasm";
+import { generateInferredSelectClause } from "../utils/csvInference";
 
 export async function csvLoader(file: File): Promise<string> {
   const { connection, db } = await initDuckDB()
@@ -22,17 +23,23 @@ export async function csvLoader(file: File): Promise<string> {
     false
   );
 
+  const selectClause = await generateInferredSelectClause(connection, utf8File.name);
+  
+  if (selectClause === "*") {
+    await connection.query(`CREATE TABLE "${tableName}" AS SELECT * FROM read_csv_auto('${utf8File.name}')`);
+    return tableName;
+  }
+
   await connection.query(`
     CREATE TABLE "${tableName}" AS
-    SELECT *
-    FROM read_csv(
+    SELECT 
+      ${selectClause}
+    FROM read_csv_auto(
       '${utf8File.name}',
       header=true,
-      delim=',',
-      sample_size=1024,
-      ignore_errors=true
+      all_varchar=true
     )
-  `)
+  `);
 
   return tableName
 }

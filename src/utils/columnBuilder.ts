@@ -1,5 +1,6 @@
 import { FormatedFieldName } from "./formatting";
 import type { VisualizationTableState } from "@/types/visual";
+import { aggregateValues } from "./aggregation";
 
 export const getAggTitle = (agg?: string) => {
   if (!agg) return "";
@@ -45,7 +46,11 @@ export const buildColumnDefinitions = (
 
         let existing = currentLevel.find((c) => c.header === displayHeader);
         if (!existing) {
-          existing = { header: displayHeader };
+          const isDate = part.toLowerCase().includes("date") || part.toLowerCase().includes("time");
+          existing = { 
+            header: displayHeader,
+            meta: { isDate }
+          };
           if (index === parts.length - 1) {
             existing.id = key;
             existing.accessorFn = (row: Record<string, unknown>) => row[key];
@@ -67,10 +72,9 @@ export const buildColumnDefinitions = (
   const grandTotalCol = hasPivotColumns && values.length > 0 ? [{
     id: "GRAND_TOTAL|||",
     accessorFn: (row: Record<string, unknown>) => {
-      return visualizationKeys.reduce((sum, key) => {
-        const val = row[key];
-        return sum + (typeof val === 'number' ? val : 0);
-      }, 0);
+      const allValues = visualizationKeys.map(key => row[key]);
+      const firstAgg = values[0]?.aggregation || "sum";
+      return aggregateValues(allValues, firstAgg);
     },
     header: "Grand Total",
   }] : [];
