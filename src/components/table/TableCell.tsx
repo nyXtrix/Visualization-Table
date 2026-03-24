@@ -1,7 +1,8 @@
 import {
   flexRender,
   type Cell
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
+import { useAppSelector } from "@/store/hooks";
 import { cn } from "@/lib/utils";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { formatDate } from "@/utils/dateFormatter";
@@ -14,6 +15,7 @@ interface TableCellProps<TData> {
 const TableCell = <TData,>({
   cell
 }: TableCellProps<TData>) => {
+  const { tableDensity, showZebraStripes } = useAppSelector((state) => state.ui.settings);
   const isRowHeader = (cell.column.columnDef.meta as Record<string, any>)?.isRowHeader === true;
   const isRowLabelColumn = cell.column.id === "rowLabels" || (isRowHeader && cell.column.id === cell.row.getVisibleCells()[0].column.id);
   const rawValue = cell.getValue();
@@ -50,7 +52,7 @@ const TableCell = <TData,>({
 
   const bgClass = isParent 
     ? "bg-white dark:bg-gray-800" 
-    : (localIndex % 2 === 0 ? "bg-gray-100 dark:bg-gray-900" : "bg-white dark:bg-gray-800");
+    : (showZebraStripes && localIndex % 2 === 0 ? "bg-gray-100 dark:bg-gray-900" : "bg-white dark:bg-gray-800");
 
     const bufferWidth = isParent ? 0 : 16;
 
@@ -63,7 +65,8 @@ const TableCell = <TData,>({
         paddingLeft: isRowLabelColumn ? `${cell.row.depth * 20 + bufferWidth}px` : undefined,
       }}
       className={cn(
-        "px-4 py-2 text-sm border-r border-b border-gray-300 whitespace-nowrap transition-colors dark:text-gray-300/75 dark:border-gray-700",
+        "px-4 border-r border-b border-gray-300 whitespace-nowrap transition-colors dark:text-gray-300/75 dark:border-gray-700",
+        tableDensity === 'compact' ? "py-1 text-xs" : "py-2 text-sm",
         isRowHeader 
           ? `${bgClass} sticky z-10 left-0 text-gray-800 font-medium` 
           : `${bgClass} text-gray-600`,

@@ -11,8 +11,8 @@ const DataEmptyState = ({ fileUploadChnage }: DataEmptyStateProps) => {
 
       <div className="flex flex-col items-center text-center gap-6 p-10 bg-white dark:bg-gray-900 dark:shadow-md dark:shadow-gray-600 dark:border-white/30 border rounded-xl shadow-sm max-w-md">
 
-        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-50 dark:bg-gray-800">
-          <Database className="h-8 w-8 text-blue-500 dark:text-amber-500" />
+        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 dark:bg-primary/20">
+          <Database className="h-8 w-8 text-primary dark:text-primary" />
         </div>
 
         <div className="space-y-1">

@@ -8,9 +8,11 @@ export async function getDistinctCombinations(
 ): Promise<any[]> {
   if (!columns.length) return [];
 
+  const q = (name: string) => `"${name.replace(/"/g, '""')}"`;
+
   const query = `
     SELECT DISTINCT ${columns.map(c => `CAST(${c} AS VARCHAR) AS "${c.replace(/"/g, '""')}"`).join(", ")}
-    FROM ${table}
+    FROM ${q(table)}
     ${joinSQL}
     ORDER BY ${columns.map(c => `CAST(${c} AS VARCHAR)`).join(", ")}
     LIMIT ${limit}

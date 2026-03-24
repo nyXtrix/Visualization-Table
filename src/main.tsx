@@ -4,11 +4,14 @@ import './index.css'
 import VisualDashboardManagement from './features/VisualDashboardManagement'
 import { Provider } from 'react-redux'
 import { store } from '@/store/store'
+import { ThemeProvider } from '@/context/ThemeContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <VisualDashboardManagement />
+      <ThemeProvider>
+        <VisualDashboardManagement />
+      </ThemeProvider>
     </Provider>
   </StrictMode>,
 )

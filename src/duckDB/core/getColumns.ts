@@ -9,7 +9,7 @@ type ColumnInfo = {
 export async function getTableColumns(tableName: string):Promise<ColumnInfo[]> {
   const { connection } = await initDuckDB();
 
-  const result = await connection.query(`DESCRIBE ${tableName}`);
+  const result = await connection.query(`DESCRIBE "${tableName}"`);
 
   const rows = result.toArray().map((r: DescribeDuckDBRow) => ({
     name: r.column_name,

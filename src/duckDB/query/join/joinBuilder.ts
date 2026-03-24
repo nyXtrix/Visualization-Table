@@ -4,11 +4,12 @@ export function buildJoinSQL(joins: Relationship[]) {
 
   let sql = ""
 
-  for (const j of joins) {
+  const q = (name: string) => `"${name.replace(/"/g, '""')}"`;
 
+  for (const j of joins) {
     sql += `
-    JOIN ${j.toTable}
-    ON ${j.fromTable}.${j.fromColumn} = ${j.toTable}.${j.toColumn}
+    JOIN ${q(j.toTable)}
+    ON ${q(j.fromTable)}.${q(j.fromColumn)} = ${q(j.toTable)}.${q(j.toColumn)}
     `
   }
 

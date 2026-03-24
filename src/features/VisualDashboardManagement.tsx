@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useState } from "react";
+import { cn } from "@/lib/utils";
 import AppLayout from "@/components/layout/AppLayout";
 import { csvLoader } from "@/duckDB/core/csvLoader";
 import { getTableColumns } from "@/duckDB/core/getColumns";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { addDataset } from "@/store/datasetSlice";
-import { setTableState } from "@/store/uiSlice";
+import { setTableState, setSidebarItems, toggleSidebarItem } from "@/store/uiSlice";
 import Loader from "@/components/shared/Loader";
 import { useVisualizationTableQuery } from "@/hooks/useVisualizationTableQuery";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -16,13 +17,13 @@ const VisualizationTablePage = lazy(() => import("./Visual_Dashboard/Visualizati
 
 const VisualDashboardManagement = () => {
   const { showExitModal, setShowExitModal, handleConfirmExit } = useUnsavedChanges();
-  const [activeItems, setActiveItems] = useState<string[]>([]);
   const dispatch = useAppDispatch();
   const datasets = useAppSelector((state) => state.dataset.datasets);
+  const { activeSidebarItems: activeItems, settings } = useAppSelector((state) => state.ui);
+  const { sidebarSide } = settings;
 
   const { data, columns, loading: queryLoading } = useVisualizationTableQuery();
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleFileUpload = useCallback(async (file: File | null) => {
     if (!file) return;
@@ -50,7 +51,7 @@ const VisualDashboardManagement = () => {
       );
 
       if (isFirstUpload) {
-        setActiveItems(["data", "visualization"]);
+        dispatch(setSidebarItems(["data", "visualization"]));
       }
     } finally {
       setUploadLoading(false);
@@ -59,10 +60,8 @@ const VisualDashboardManagement = () => {
 
 
   const handlePrimaryActionButtonClick = useCallback((id: string) => {
-    setActiveItems((prev) => 
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  }, []);
+    dispatch(toggleSidebarItem(id));
+  }, [dispatch]);
 
   const isDataOpen = activeItems.includes("data");
   const isVisualisationOpen = activeItems.includes("visualization");
@@ -81,13 +80,12 @@ const VisualDashboardManagement = () => {
         variant="danger"
       />
       <AppLayout
-        activeItems={activeItems}
-        handlePrimaryActionButtonClick={handlePrimaryActionButtonClick}
         isSidebarPrimaryActionsEnabled={datasets.length > 0}
-        isSettingsOpen={isSettingsOpen}
-        setIsSettingsOpen={setIsSettingsOpen}
       >
-        <div className="bg-white dark:bg-black flex h-full w-full overflow-hidden">
+        <div className={cn(
+          "bg-white dark:bg-black flex h-full w-full overflow-hidden",
+          sidebarSide === 'left' ? "flex-row-reverse" : "flex-row"
+        )}>
           <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30 dark:border dark:border-gray-600 dark:bg-gray-900/90">
             <Suspense fallback={<Loader fullPage/>}>
               <VisualizationTablePage
@@ -101,7 +99,7 @@ const VisualDashboardManagement = () => {
           
           <Suspense fallback={null}>
             <VisualisationCard
-              id="visualisation"
+              id="visualization"
               isOpen={isVisualisationOpen}
               handleCloseCardClick={handlePrimaryActionButtonClick}
             />

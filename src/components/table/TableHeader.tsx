@@ -1,4 +1,5 @@
 import { flexRender, type Table } from "@tanstack/react-table";
+import { useAppSelector } from "@/store/hooks";
 import { cn } from "@/lib/utils";
 
 interface TableHeaderProps<TData> {
@@ -6,6 +7,7 @@ interface TableHeaderProps<TData> {
 }
 
 const TableHeader = <TData,>({ table }: TableHeaderProps<TData>) => {
+  const { tableDensity } = useAppSelector((state) => state.ui.settings);
   return (
     <thead className="z-20 select-none">
       {table.getHeaderGroups().map((headerGroup) => (
@@ -31,7 +33,8 @@ const TableHeader = <TData,>({ table }: TableHeaderProps<TData>) => {
                   minWidth: isRowHeader ? "200px" : header.column.getSize(),
                 }}
                 className={cn(
-                  "px-4 py-3 text-xs uppercase tracking-wider font-bold border-r transition-colors border-gray-300 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600",
+                  "px-4 uppercase tracking-wider font-bold border-r transition-colors border-gray-300 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600",
+                  tableDensity === 'compact' ? "py-1.5 text-[10px]" : "py-3 text-xs",
                   header.isPlaceholder ? "border-b-0" : "border-b",
                   isRowHeader ? "sticky left-0 z-30" : "",
                   isGrouped ? "text-center" : "text-left",

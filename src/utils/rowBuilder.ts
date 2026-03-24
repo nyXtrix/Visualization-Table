@@ -1,5 +1,4 @@
 import type { VisualizationField } from "@/types/visual";
-import { aggregateValues, getVField } from "./aggregation";
 
 export interface HierarchicalRow extends Record<string, unknown> {
   subRows?: HierarchicalRow[];
@@ -10,30 +9,23 @@ export interface HierarchicalRow extends Record<string, unknown> {
 export const buildRowHierarchy = (
   flatData: Record<string, unknown>[],
   rowFields: VisualizationField[],
-  valueFields: VisualizationField[] = []
+  _valueFields: VisualizationField[] = []
 ): HierarchicalRow[] => {
   if (flatData.length === 0) return [];
   if (rowFields.length === 0) return flatData as HierarchicalRow[];
 
   const groupKeys = rowFields.map((f) => `${f.tableName}.${f.name}`);
+  const maxLevel = (1 << rowFields.length) - 1;
+
+  const grandTotalRowData = flatData.find(r => Number(r.__level) === maxLevel) || flatData[0];
   
   const grandTotalRow: HierarchicalRow = {
+    ...grandTotalRowData,
     rowLabel: "All",
-    rowDepth: -1, 
+    rowDepth: -1,
   };
 
-  const allKeys = Object.keys(flatData[0]);
-  allKeys.forEach((key) => {
-    if (groupKeys.includes(key) || key === 'rowLabel' || key === 'rowDepth') return;
-    
-    const vField = getVField(key, valueFields);
-    const aggValues = flatData.map(r => r[key]);
-    const result = aggregateValues(aggValues, vField?.aggregation);
-    
-    if (result !== undefined) grandTotalRow[key] = result;
-  });
-
-  grandTotalRow.subRows = createHierarchy(flatData, groupKeys, 0, valueFields);
+  grandTotalRow.subRows = createHierarchy(flatData, groupKeys, 0, {});
 
   return [grandTotalRow];
 };
@@ -42,40 +34,40 @@ const createHierarchy = (
   rows: Record<string, unknown>[],
   groupKeys: string[],
   depth: number,
-  valueFields: VisualizationField[]
+  parentFilters: Record<string, unknown>
 ): HierarchicalRow[] => {
   if (depth >= groupKeys.length) return [];
 
   const currentKey = groupKeys[depth];
-  const hierarchy: HierarchicalRow[] = [];
+  const subtotalLevel = (1 << (groupKeys.length - 1 - depth)) - 1;
+  const detailLevel = 0;
 
-  const groups = Array.from(new Set(rows.map(r => r[currentKey])));
+  const relevantRows = rows.filter(r => 
+    Object.entries(parentFilters).every(([k, v]) => r[k] === v)
+  );
 
-  groups.forEach((groupValue) => {
-    const matchingRows = rows.filter(r => r[currentKey] === groupValue);
+  const levelRows = relevantRows.filter(r => Number(r.__level) === subtotalLevel && r[currentKey] !== null);
+
+  return levelRows.map((levelRow) => {
+    const groupValue = levelRow[currentKey];
     
-    const parentRow: HierarchicalRow = {
-      ...matchingRows[0], 
+    const node: HierarchicalRow = {
+      ...levelRow,
       rowLabel: String(groupValue ?? "(Empty)"),
       rowDepth: depth
     };
 
-    Object.keys(parentRow).forEach(columnKey => {
-      if (groupKeys.includes(columnKey) || columnKey === 'rowLabel' || columnKey === 'rowDepth') return;
-
-      const vField = getVField(columnKey, valueFields);
-      const aggValues = matchingRows.map(r => r[columnKey]);
-      const result = aggregateValues(aggValues, vField?.aggregation);
-
-      if (result !== undefined) parentRow[columnKey] = result;
-    });
-
     if (depth < groupKeys.length - 1) {
-      parentRow.subRows = createHierarchy(matchingRows, groupKeys, depth + 1, valueFields);
+      const nextFilters = { ...parentFilters, [currentKey]: groupValue };
+      node.subRows = createHierarchy(relevantRows, groupKeys, depth + 1, nextFilters);
+    } else {
+      const detailRow = relevantRows.find(r => 
+        Number(r.__level) === detailLevel && 
+        Object.entries({ ...parentFilters, [currentKey]: groupValue }).every(([k, v]) => r[k] === v)
+      );
+      if (detailRow) Object.assign(node, detailRow);
     }
 
-    hierarchy.push(parentRow);
+    return node;
   });
-
-  return hierarchy;
 };

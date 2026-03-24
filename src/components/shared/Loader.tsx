@@ -11,7 +11,7 @@ interface LoaderProps {
 const Loader: React.FC<LoaderProps> = ({
   size = 35,
   speed = '0.8s',
-  color = '#5D3FD3',
+  color = 'var(--primary)',
   className = '',
   fullPage = false,
 }) => {
@@ -33,7 +33,7 @@ const Loader: React.FC<LoaderProps> = ({
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-9999 flex items-center justify-center bg-white/50 dark:bg-gray-700/50 backdrop-blur-[2px] pointer-events-none">
+      <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 dark:bg-black/40 backdrop-blur-md pointer-events-none transition-all duration-300">
         {loader}
       </div>
     );

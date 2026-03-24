@@ -6,9 +6,11 @@ export const aggregateValues = (values: any[], aggType: AggregationType = "sum")
 
   switch (aggType) {
     case "sum":
-    case "count":
-    case "count_distinct":
       return validValues.reduce((acc, val) => acc + (Number(val) || 0), 0);
+    case "count":
+      return validValues.length;
+    case "count_distinct":
+      return new Set(validValues.map(v => String(v))).size;
     case "avg":
       const sum = validValues.reduce((acc, val) => acc + (Number(val) || 0), 0);
       return sum / validValues.length;

@@ -60,7 +60,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
           "flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-lg p-8 cursor-pointer transition-all",
           isDragging
             ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-900/60 dark:hover:border-amber-500 dark:border-gray-500",
+            : "border-gray-300 hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 dark:hover:border-primary dark:border-gray-500",
         )}
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {

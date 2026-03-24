@@ -181,15 +181,22 @@ export async function generateVisualizationTableQuery({
     throw new Error("No fields selected");
   }
 
-  let query = `
+  if (groupFields.length) {
+    const groupingIdExpr = `GROUPING_ID(${groupFields.map(f => f.includes(' ') ? f : f).join(", ")})`;
+    selectFields.unshift(`${groupingIdExpr} AS "__level"`);
+    
+    return `
+      SELECT ${selectFields.join(", ")}
+      FROM ${q(baseTable)}
+      ${joinSQL}
+      GROUP BY ROLLUP(${groupFields.join(", ")})
+      ORDER BY ${groupFields.join(", ")} ASC, "__level" DESC
+    `;
+  }
+
+  return `
     SELECT ${selectFields.join(", ")}
     FROM ${q(baseTable)}
     ${joinSQL}
   `;
-
-  if (groupFields.length) {
-    query += ` GROUP BY ${groupFields.join(", ")}`;
-  }
-
-  return query;
 }

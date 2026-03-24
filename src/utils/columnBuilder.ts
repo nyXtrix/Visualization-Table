@@ -14,7 +14,7 @@ export const buildColumnDefinitions = (
   const { rows, values } = visualizationState;
   const rowKeyStrings = rows.map((r) => `${r.tableName}.${r.name}`);
   
-  const visualizationKeys = allKeys.filter((k) => !rowKeyStrings.includes(k));
+  const visualizationKeys = allKeys.filter((k) => !rowKeyStrings.includes(k) && k !== "__level");
 
   const rowCols = rows.length > 0 
     ? [{

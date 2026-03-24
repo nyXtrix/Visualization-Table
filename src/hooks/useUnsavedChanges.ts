@@ -14,54 +14,54 @@ export const useUnsavedChanges = () => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (hasDatasets) {
         event.preventDefault();
-        event.returnValue = '';
-        return '';
+        event.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return event.returnValue;
+      }
+    };
+
+    const handlePopState = () => {
+      if (hasDatasets) {
+        setExitType("NAVIGATE");
+        setShowExitModal(true);
+        window.history.pushState(null, "", window.location.href);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!hasDatasets) return;
 
-      const isF5 = event.key === 'F5';
-      const isRWithModifier = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'r';
+      const isF5 = event.key === "F5";
+      const isRWithModifier = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "r";
 
       if (isF5 || isRWithModifier) {
         event.preventDefault();
-        setExitType('REFRESH');
+        setExitType("REFRESH");
         setShowExitModal(true);
       }
     };
 
-    const handlePopState = () => {
-      if (hasDatasets) {
-        window.history.pushState({ guarded: true }, '');
-        setExitType('NAVIGATE');
-        setShowExitModal(true);
-      }
-    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("keydown", handleKeyDown);
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('popstate', handlePopState);
-
-    if (hasDatasets && !window.history.state?.guarded) {
-      window.history.pushState({ guarded: true }, '');
+    if (hasDatasets) {
+      window.history.pushState(null, "", window.location.href);
     }
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [hasDatasets]);
 
   const handleConfirmExit = useCallback(() => {
-    if (exitType === 'REFRESH') {
+    setShowExitModal(false);
+    if (exitType === "REFRESH") {
       window.location.reload();
-    } else if (exitType === 'NAVIGATE') {
+    } else {
       window.history.go(-2);
     }
-    setShowExitModal(false);
   }, [exitType]);
 
   const handleCancelExit = useCallback(() => {

@@ -61,7 +61,7 @@ const DataFieldItem = ({ field, tableName }: FieldItemProps) => {
             type="checkbox" 
           checked={isChecked}
             onChange={handleCheckboxChange}
-            className="h-4 w-4 rounded border-gray-300 checkbox-custom-style focus:ring-blue-500 dark:focus:ring-amber-500 focus:border-none"
+            className="h-4 w-4 rounded border-gray-300 checkbox-custom-style focus:ring-primary focus:border-none"
           />
         </div>
         

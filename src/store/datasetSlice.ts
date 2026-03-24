@@ -1,8 +1,9 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createSelector, type PayloadAction } from "@reduxjs/toolkit";
 
 type Field = {
   id: number;
   name: string;
+  type?: string;
 };
 
 type Dataset = {
@@ -29,6 +30,11 @@ const datasetSlice = createSlice({
     },
   },
 });
+
+export const selectDatasets = (state: { dataset: DatasetState }) => state.dataset.datasets;
+
+export const selectDatasetById = (id: string) => 
+  createSelector([selectDatasets], (datasets) => datasets.find((d) => d.id === id));
 
 export const { addDataset } = datasetSlice.actions;
 export default datasetSlice.reducer;
