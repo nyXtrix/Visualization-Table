@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { AggregationType, VisualizationField, VisualizationTableState } from "@/types/visual";
+import type { AggregationType, SortConfig, VisualizationField, VisualizationTableState } from "@/types/visual";
 
 const initialState: VisualizationTableState = {
   rows: [],
@@ -12,6 +12,14 @@ const visualSlice = createSlice({
   name: "visual",
   initialState,
   reducers: {
+    setSortConfig(state, action: PayloadAction<SortConfig>) {
+      state.sortConfig = action.payload;
+    },
+
+    removeSort(state) {
+      delete state.sortConfig;
+    },
+
     addRow(state, action: PayloadAction<VisualizationField & { index?: number }>) {
       const { name, tableName, index } = action.payload;
       
@@ -90,6 +98,7 @@ const visualSlice = createSlice({
       state.rows = [];
       state.columns = [];
       state.values = [];
+      delete state.sortConfig;
     },
 
     checkField(state, action: PayloadAction<VisualizationField>) {
@@ -155,6 +164,8 @@ export const {
   reorderRow,
   reorderColumn,
   reorderValue,
+  setSortConfig,
+  removeSort,
 } = visualSlice.actions;
 
 export default visualSlice.reducer;

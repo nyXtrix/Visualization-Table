@@ -4,11 +4,18 @@ import { cn } from "@/lib/utils";
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "link" | "ghost";
+  size?: "sm" | "md" | "lg";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = "", variant = "primary", children, ...props }, ref) => {
+  ({ className = "", variant = "primary", size = "md", children, ...props }, ref) => {
     const baseStyles = "px-4 py-2 rounded font-medium transition";
+
+    const buttonSize = {
+      sm: "px-2 py-1 text-xs",
+      md: "px-4 py-2 text-sm",
+      lg: "px-6 py-3 text-base",
+    };
 
     const variantStyles = {
       primary: "bg-blue-600 text-white hover:bg-blue-700",
@@ -21,7 +28,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(baseStyles, variantStyles[variant], className)}
+        className={cn(baseStyles, variantStyles[variant], buttonSize[size], className)}
         {...props}
       >
         {children}

@@ -18,7 +18,7 @@ export const buildRowHierarchy = (
   const maxLevel = (1 << rowFields.length) - 1;
 
   const grandTotalRowData = flatData.find(r => Number(r.__level) === maxLevel) || flatData[0];
-  
+
   const grandTotalRow: HierarchicalRow = {
     ...grandTotalRowData,
     rowLabel: "All",
@@ -42,7 +42,7 @@ const createHierarchy = (
   const subtotalLevel = (1 << (groupKeys.length - 1 - depth)) - 1;
   const detailLevel = 0;
 
-  const relevantRows = rows.filter(r => 
+  const relevantRows = rows.filter(r =>
     Object.entries(parentFilters).every(([k, v]) => r[k] === v)
   );
 
@@ -50,7 +50,7 @@ const createHierarchy = (
 
   return levelRows.map((levelRow) => {
     const groupValue = levelRow[currentKey];
-    
+
     const node: HierarchicalRow = {
       ...levelRow,
       rowLabel: String(groupValue ?? "(Empty)"),
@@ -61,8 +61,8 @@ const createHierarchy = (
       const nextFilters = { ...parentFilters, [currentKey]: groupValue };
       node.subRows = createHierarchy(relevantRows, groupKeys, depth + 1, nextFilters);
     } else {
-      const detailRow = relevantRows.find(r => 
-        Number(r.__level) === detailLevel && 
+      const detailRow = relevantRows.find(r =>
+        Number(r.__level) === detailLevel &&
         Object.entries({ ...parentFilters, [currentKey]: groupValue }).every(([k, v]) => r[k] === v)
       );
       if (detailRow) Object.assign(node, detailRow);

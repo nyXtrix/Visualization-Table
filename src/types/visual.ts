@@ -16,10 +16,16 @@ export interface VisualizationField {
   type?: string;
 }
 
+export interface SortConfig {
+  columnId: string;
+  direction: "asc" | "desc";
+}
+
 export interface VisualizationTableState {
   rows: VisualizationField[];
   columns: VisualizationField[];
   values: VisualizationField[];
+  sortConfig?: SortConfig;
 }
 
 export interface Dataset {

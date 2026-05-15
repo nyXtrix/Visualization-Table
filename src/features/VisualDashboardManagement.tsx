@@ -10,6 +10,7 @@ import Loader from "@/components/shared/Loader";
 import { useVisualizationTableQuery } from "@/hooks/useVisualizationTableQuery";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
+import Toast from "@/components/shared/Toast";
 
 const DataCard = lazy(() => import("./Visual_Dashboard/Features/DataCard"));
 const VisualisationCard = lazy(() => import("./Visual_Dashboard/Features/VisualisationCard"));
@@ -61,11 +62,21 @@ const VisualDashboardManagement = () => {
 
   const handlePrimaryActionButtonClick = useCallback((id: string) => {
     dispatch(toggleSidebarItem(id));
+    Toast({                   
+      toast: {
+        id: "sidebar-toggle",
+        message: "Sidebar toggled",
+        type: "success",
+      }
+    })
   }, [dispatch]);
 
   const isDataOpen = activeItems.includes("data");
   const isVisualisationOpen = activeItems.includes("visualization");
-  
+
+  console.log('Data: ', data)
+  console.log('Columns: ', columns)
+
   return (
     <>
       {uploadLoading && datasets.length === 0 && <Loader fullPage />}
@@ -87,7 +98,7 @@ const VisualDashboardManagement = () => {
           sidebarSide === 'left' ? "flex-row-reverse" : "flex-row"
         )}>
           <div className="h-full flex-1 min-w-0 border-r bg-gray-50/30 dark:border dark:border-gray-600 dark:bg-gray-900/90">
-            <Suspense fallback={<Loader fullPage/>}>
+            <Suspense fallback={<Loader fullPage />}>
               <VisualizationTablePage
                 data={data}
                 columns={columns}
@@ -96,7 +107,7 @@ const VisualDashboardManagement = () => {
               />
             </Suspense>
           </div>
-          
+
           <Suspense fallback={null}>
             <VisualisationCard
               id="visualization"

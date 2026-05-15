@@ -27,6 +27,7 @@ function formatPositiveNumber(num: number): string {
   if (num >= 1_000) {
     return format(num, 1_000, "K");
   }
+  
 
   return num.toLocaleString(undefined, {
     maximumFractionDigits: 2,

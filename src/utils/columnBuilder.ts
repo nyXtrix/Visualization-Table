@@ -13,16 +13,16 @@ export const buildColumnDefinitions = (
 ) => {
   const { rows, values } = visualizationState;
   const rowKeyStrings = rows.map((r) => `${r.tableName}.${r.name}`);
-  
+
   const visualizationKeys = allKeys.filter((k) => !rowKeyStrings.includes(k) && k !== "__level");
 
-  const rowCols = rows.length > 0 
+  const rowCols = rows.length > 0
     ? [{
-        id: "rowLabels",
-        accessorKey: "rowLabel",
-        header: rows.length === 1 ? FormatedFieldName(rows[0].name) : "Row Labels",
-        meta: { isRowHeader: true },
-      }]
+      id: "rowLabels",
+      accessorKey: "rowLabel",
+      header: rows.length === 1 ? FormatedFieldName(rows[0].name) : "Row Labels",
+      meta: { isRowHeader: true },
+    }]
     : [];
 
   const buildTree = (keys: string[]) => {
@@ -47,7 +47,7 @@ export const buildColumnDefinitions = (
         let existing = currentLevel.find((c) => c.header === displayHeader);
         if (!existing) {
           const isDate = part.toLowerCase().includes("date") || part.toLowerCase().includes("time");
-          existing = { 
+          existing = {
             header: displayHeader,
             meta: { isDate }
           };
@@ -68,7 +68,7 @@ export const buildColumnDefinitions = (
   const leafCols = buildTree(visualizationKeys);
 
   const hasPivotColumns = visualizationState.columns.length > 0;
-  
+
   const grandTotalCol = hasPivotColumns && values.length > 0 ? [{
     id: "GRAND_TOTAL|||",
     accessorFn: (row: Record<string, unknown>) => {

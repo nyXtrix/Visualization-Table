@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <IconButton
               icon={action.icon}
               variant="ghost"
-              className={cn("p-2! cursor-pointer rounded-md transition-all", activeItem.includes(action.id) ? "" : "hover:bg-gray-100 dark:hover:bg-primary/20 text-primary dark:text-primary", isSecondaryActionDisabled ? "opacity-50 cursor-not-allowed" : "" )}
+              className={cn("p-2! cursor-pointer rounded-md transition-all", activeItem.includes(action.id) ? "" : "dark:hover:bg-primary/20 text-primary dark:text-primary bg-primary/20 hover:bg-primary/20", isSecondaryActionDisabled ? "opacity-50 cursor-not-allowed" : "" )}
               disabled={isSecondaryActionDisabled}
               onClick={() => {
                 if (action.id === "settings") {

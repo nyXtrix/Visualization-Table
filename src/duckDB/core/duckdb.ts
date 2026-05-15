@@ -1,5 +1,6 @@
 import * as duckdb from "@duckdb/duckdb-wasm"
 import { DUCKDB_BUNDLES } from "@/constant/utils";
+import Toast from "@/components/shared/Toast";
 
 interface DuckDBGlobal {
   _duckdb_db?: duckdb.AsyncDuckDB;
@@ -38,6 +39,7 @@ export async function initDuckDB() {
     } catch (error) {
       _global._duckdb_init_promise = null;
       console.error("DuckDB initialization failed:", error);
+      Toast({ toast: { id: "duckdb-init-failed", message: "DuckDB initialization failed", type: "error" } });
       throw error;
     }
   })();

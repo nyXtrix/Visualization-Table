@@ -8,7 +8,7 @@ export async function csvLoader(file: File): Promise<string> {
   const tableName = file.name
     .replace(".csv", "")
     .replace(/[^a-zA-Z0-9_]/g, "_")
-  
+
   const buffer = await file.arrayBuffer()
 
   const decoder = new TextDecoder("utf-8")
@@ -24,13 +24,13 @@ export async function csvLoader(file: File): Promise<string> {
   );
 
   const selectClause = await generateInferredSelectClause(connection, utf8File.name);
-  
+
   if (selectClause === "*") {
     await connection.query(`CREATE TABLE "${tableName}" AS SELECT * FROM read_csv_auto('${utf8File.name}')`);
     return tableName;
   }
 
-    await connection.query(`
+  await connection.query(`
       CREATE TABLE "${tableName}" AS
       SELECT 
         ${selectClause}

@@ -22,14 +22,14 @@ export async function generateVisualizationTableQuery({
   const q = (name: string) => `"${name.replace(/"/g, '""')}"`;
 
   const normalize = (f: VisualizationField | string): string => {
-  if (typeof f === "string") return f;
+    if (typeof f === "string") return f;
 
-  if (f.tableName && f.name) {
-    return `${q(f.tableName)}.${q(f.name)}`;
-  }
+    if (f.tableName && f.name) {
+      return `${q(f.tableName)}.${q(f.name)}`;
+    }
 
-  return q(f.name || String(f));
-};
+    return q(f.name || String(f));
+  };
 
   const safeRows = (rowFields || []).map(f => `${q(f.tableName)}.${q(f.name)} AS ${q(f.tableName + "." + f.name)}`);
   const safeColumns = (colFields || []).map(normalize);
@@ -42,7 +42,7 @@ export async function generateVisualizationTableQuery({
     ...(colFields || []).map(f => `${f.tableName}.${f.name}`),
     ...(valFields || []).map(f => `${f.tableName}.${f.name}`)
   ];
-  
+
   const firstTable = [...(rowFields || []), ...(colFields || []), ...(valFields || [])]
     .find(f => typeof f === 'object' && f?.tableName)?.tableName;
 
@@ -51,17 +51,17 @@ export async function generateVisualizationTableQuery({
   if (!baseTable) {
     const firstField = allFields[0];
     if (firstField && firstField.includes('.')) {
-       const extractedFromField = firstField.split('.')[0];
-       if (extractedFromField && extractedFromField !== 'undefined' && extractedFromField !== 'null') {
-          return generateVisualizationTableQuery({ baseTable: extractedFromField, rows: rowFields, columns: colFields, values: valFields });
-       }
+      const extractedFromField = firstField.split('.')[0];
+      if (extractedFromField && extractedFromField !== 'undefined' && extractedFromField !== 'null') {
+        return generateVisualizationTableQuery({ baseTable: extractedFromField, rows: rowFields, columns: colFields, values: valFields });
+      }
     }
     throw new Error("No base table determined. Please drag a field into the table area after uploading a CSV.");
   }
 
   const tables = extractTablesFromFields(allFields);
   const joins = resolveJoinPath(baseTable, tables);
-  
+
   const reachableTables = new Set([baseTable, ...joins.map(j => j.toTable)]);
   for (const table of tables) {
     if (!reachableTables.has(table)) {
@@ -80,9 +80,9 @@ export async function generateVisualizationTableQuery({
     const sqlFunc = AGGREGATION_SQL_MAPPING[agg as keyof typeof AGGREGATION_SQL_MAPPING] || "SUM";
 
     let baseExpr = fieldFullName;
-    
+
     if (["sum", "avg", "stddev", "variance", "median"].includes(agg)) {
-       baseExpr = `TRY_CAST(${fieldFullName} AS DOUBLE)`;
+      baseExpr = `TRY_CAST(${fieldFullName} AS DOUBLE)`;
     }
 
     if (condition) {
@@ -92,7 +92,7 @@ export async function generateVisualizationTableQuery({
       if (agg === "count") {
         return `COUNT(CASE WHEN ${condition} THEN 1 END)`;
       }
-      
+
       if (["first", "last"].includes(agg)) {
         const sqlFunc = agg === "first" ? "FIRST" : "LAST";
         return `${sqlFunc}(${fieldFullName}) FILTER (WHERE ${condition} AND ${fieldFullName} IS NOT NULL)`;
@@ -139,9 +139,9 @@ export async function generateVisualizationTableQuery({
 
   else if (safeColumns.length) {
     const combinationResults = await getDistinctCombinations(
-      baseTable, 
-      safeColumns, 
-      joinSQL, 
+      baseTable,
+      safeColumns,
+      joinSQL,
       MAX_VISUALIZATION_COMBINATIONS
     );
 
@@ -184,7 +184,7 @@ export async function generateVisualizationTableQuery({
   if (groupFields.length) {
     const groupingIdExpr = `GROUPING_ID(${groupFields.map(f => f.includes(' ') ? f : f).join(", ")})`;
     selectFields.unshift(`${groupingIdExpr} AS "__level"`);
-    
+
     return `
       SELECT ${selectFields.join(", ")}
       FROM ${q(baseTable)}
